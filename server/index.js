@@ -23,8 +23,8 @@ io.on("connection", (socket) => {
     console.log(`User ${socket.id} joined room ${roomId}`);
   });
 
-  socket.on("send-changes", ({ roomId, content }) => {
-    socket.to(roomId).emit("receive-changes", content);
+  socket.on("send-changes", ({ roomId, delta }) => {
+    socket.to(roomId).emit("receive-changes", delta);
   });
 
   socket.on("disconnect", () => {
