@@ -4,36 +4,37 @@ import Quill from "quill";
 import "quill/dist/quill.snow.css";
 
 const socket = io("http://localhost:5000");
+const roomId = "demo-room";
 
 function App() {
   const editorRef = useRef(null);
   const quillRef = useRef(null);
-  const roomId = "demo-room";
 
-useEffect(() => {
-  if (quillRef.current) return; // 🔥 PREVENT DOUBLE INIT
+  // 🔹 Initialize editor ONCE
+  useEffect(() => {
+    if (quillRef.current) return;
 
-  quillRef.current = new Quill(editorRef.current, {
-    theme: "snow",
-    placeholder: "Start collaborating...",
-  });
+    quillRef.current = new Quill(editorRef.current, {
+      theme: "snow",
+      placeholder: "Start collaborating...",
+    });
 
-    // Join room
-    socket.emit("join-room", roomId);
-
-    // 🔥 SEND ONLY USER CHANGES
     quillRef.current.on("text-change", (delta, oldDelta, source) => {
-      if (source !== "user") return; // VERY IMPORTANT
+      if (source !== "user") return;
 
       socket.emit("send-changes", {
         roomId,
         delta,
       });
     });
+  }, []);
 
-    // 🔥 APPLY REMOTE CHANGES SILENTLY
+  // 🔹 Socket logic (ALWAYS active)
+  useEffect(() => {
+    socket.emit("join-room", roomId);
+
     socket.on("receive-changes", (delta) => {
-      quillRef.current.updateContents(delta, "silent");
+      quillRef.current?.updateContents(delta, "silent");
     });
 
     return () => {
@@ -55,10 +56,3 @@ useEffect(() => {
 }
 
 export default App;
-
-
-
-
-
-
-
