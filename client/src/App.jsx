@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const socket = io("http://localhost:5000");
 
 function App() {
-  const [text, setText] = useState("");
-  const roomId = "demo-room"; // static for Day-2
+  const [content, setContent] = useState("");
+  const roomId = "demo-room";
 
   useEffect(() => {
     socket.emit("join-room", roomId);
 
-    socket.on("receive-changes", (content) => {
-      setText(content);
+    socket.on("receive-changes", (data) => {
+      setContent(data);
     });
 
     return () => {
@@ -19,10 +21,8 @@ function App() {
     };
   }, []);
 
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setText(value);
-
+  const handleChange = (value) => {
+    setContent(value);
     socket.emit("send-changes", {
       roomId,
       content: value,
@@ -34,17 +34,17 @@ function App() {
       <h2>Real-Time Collaboration Tool</h2>
       <p>Room: {roomId}</p>
 
-      <textarea
-        value={text}
+      <ReactQuill
+        theme="snow"
+        value={content}
         onChange={handleChange}
-        rows="10"
-        cols="60"
-        placeholder="Start typing..."
+        placeholder="Start collaborating..."
       />
     </div>
   );
 }
 
 export default App;
+
 
 
