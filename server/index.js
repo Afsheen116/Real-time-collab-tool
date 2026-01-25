@@ -33,6 +33,14 @@ io.on("connection", (socket) => {
     if (!usersInRoom[roomId]) {
       usersInRoom[roomId] = [];
     }
+    socket.on("typing", ({ roomId, username }) => {
+  socket.to(roomId).emit("user-typing", username);
+});
+
+socket.on("stop-typing", (roomId) => {
+  socket.to(roomId).emit("user-stop-typing");
+});
+
 
     // ✅ Prevent duplicate entries
     const alreadyExists = usersInRoom[roomId].some(
